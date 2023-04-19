@@ -24,10 +24,20 @@ function App() {
     });
   };
 
+  function sortDateTimeStringArray(dateTimeStringArray) {
+    dateTimeStringArray.sort(function(dateTimeString1, dateTimeString2) {
+      return new Date(dateTimeString1) - new Date(dateTimeString2);
+    });
+    return dateTimeStringArray;
+  }
+
   const processData = (data) => {
     let onlinePaymentSubtotal = 0, onlineDiscount = 0, onlineVoucher = 0;
     let cashPaymentSubtotal = 0, cashDiscount =0, cashVoucher = 0;
+    let ordersRecivedDateTime = [];
+
     data.forEach( (value) => {
+      ordersRecivedDateTime.push( value["Order received at"] );
       if ( value["Payment type"] === "Online" ) {
         onlinePaymentSubtotal += value["Subtotal"];
         onlineDiscount += value["Discount"];
@@ -39,12 +49,15 @@ function App() {
         cashVoucher += value["Voucher"];
       }
     });
+    ordersRecivedDateTime = (sortDateTimeStringArray( ordersRecivedDateTime ) );
     return  { "onlinePaymentSubtotal": onlinePaymentSubtotal,
               "cashPaymentSubtotal": cashPaymentSubtotal,
               "onlineDiscount": onlineDiscount,
               "onlineVoucher": onlineVoucher,
               "cashDiscount": cashDiscount,
-              "cashVoucher": cashVoucher
+              "cashVoucher": cashVoucher,
+              "firstOrderRecived": ordersRecivedDateTime[0],
+              "lastOrderRecived": ordersRecivedDateTime.pop()
             };
   }
 
@@ -73,6 +86,8 @@ function App() {
           // Render the parsed CSV data
           <div className="result-table-wrapper">
             <p><strong>File: </strong> {csvData.fileName}</p>
+            <p><strong>First order recived at: </strong> {csvData.firstOrderRecived}</p>
+            <p><strong>Last order recived at: </strong> {csvData.lastOrderRecived}</p>
             <table>
               <thead>
                 <tr>

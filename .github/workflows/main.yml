@@ -16,7 +16,8 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build
+
     - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: build # The folder the action should deploy.
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        folder: build # The folder the action should deploy.

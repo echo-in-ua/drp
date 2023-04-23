@@ -4,24 +4,46 @@ import "./App.css";
 
 function App() {
   const [csvData, setCsvData] = useState(null);
+  const [fileError, setFileError] = useState( [] );
+
+  function validFile (file) {
+    return ( file.type === "text/csv" );
+  }
 
   const handleDrop = (event) => {
+    setFileError( [] );
     event.preventDefault();
     const file = event.dataTransfer.files[0];
-    console.log (file.name);
-    Papa.parse(file, {
-      header: true,
-      dynamicTyping: true,
-      complete: (results) => {
-        let res = processData(results.data);
-        res["fileName"] = file.name;
-        setCsvData(res);
-        console.log (results);
-      },
-      error: (error) => {
-        console.error(error);
-      },
-    });
+    if ( validFile(file) ) {
+      Papa.parse(file, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          if ( results.errors.length > 0 ){
+            const errors = [];
+            results.errors.forEach ( item => {
+              errors.push({message: item.message});
+            });
+            setFileError(errors);
+            setCsvData({fileName: file.name});  
+          } else {
+            let res = processData(results.data);
+            res["fileName"]  = file.name;
+            setCsvData(res); 
+          }
+        },
+        error: (error) => {
+          console.error(error);
+          const errors = [ {message: error.message} ];
+          setFileError(errors);
+        },
+      });  
+    } else {
+      const errors = [ { message: "File type must be csv" } ];
+      setFileError(errors);
+    }
+    
   };
 
   function sortDateTimeStringArray(dateTimeStringArray) {
@@ -68,7 +90,16 @@ function App() {
   const handleDragLeave = () => {
     // Do something when the file is dragged out of the drop zone
   };
+  function Errors(){
+    const errorMessages = fileError.map( (error,index) => { return <li key={index}>{error.message}</li> } );
+    return errorMessages;
+  }
 
+  const errorsClasName =
+    'errors' +
+    (fileError.length > 0 ? ' display' : '') 
+  ;
+  
   return (
     <>
       <div
@@ -79,10 +110,16 @@ function App() {
       >
         <p>Drop CSV file here</p>
       </div>
+      <div className={errorsClasName}>
+        <p><strong>{`Get an errors on processing file :${csvData.fileName}`}</strong></p>
+        <ul className="error-list">
+          <Errors/>
+        </ul>
+      </div>
       <div
         className="results"
       >
-        {csvData ? (
+        { csvData && fileError.length === 0 ? (
           // Render the parsed CSV data
           <div className="result-table-wrapper">
             <p><strong>File: </strong> {csvData.fileName}</p>
@@ -112,6 +149,13 @@ function App() {
                   <td>{ csvData.cashDiscount }</td>
                   <td>{ csvData.cashVoucher }</td>
                   <td>{ csvData.cashPaymentSubtotal-csvData.cashDiscount-csvData.cashVoucher }</td>
+                </tr>
+                <tr>
+                  <td><strong>Total</strong></td>
+                  <td>{ csvData.cashPaymentSubtotal + csvData.onlinePaymentSubtotal }</td>
+                  <td>{ csvData.cashDiscount + csvData.onlineDiscount}</td>
+                  <td>{ csvData.cashVoucher + csvData.onlineVoucher }</td>
+                  <td>{ (csvData.cashPaymentSubtotal-csvData.cashDiscount-csvData.cashVoucher) + (csvData.onlinePaymentSubtotal-csvData.onlineDiscount-csvData.onlineVoucher) }</td>
                 </tr>
               </tbody>
             </table>

@@ -111,7 +111,7 @@ function App() {
         <p>Drop CSV file here</p>
       </div>
       <div className={errorsClasName}>
-        <p><strong>{`Get an errors on processing file :${csvData.fileName}`}</strong></p>
+        <p><strong>{`Get an errors on processing file :${ csvData ? csvData.fileName : '' }`}</strong></p>
         <ul className="error-list">
           <Errors/>
         </ul>

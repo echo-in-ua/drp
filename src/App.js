@@ -54,30 +54,26 @@ function App() {
   }
 
   const processData = (data) => {
-    let onlinePaymentSubtotal = 0, onlineDiscount = 0, onlineVoucher = 0;
-    let cashPaymentSubtotal = 0, cashDiscount =0, cashVoucher = 0;
+    let onlinePaymentSubtotal = 0, onlineDiscountsPlusVouchers = 0;
+    let cashPaymentSubtotal = 0, cashDiscountsPlusVouchers = 0;
     let ordersRecivedDateTime = [];
 
     data.forEach( (value) => {
       ordersRecivedDateTime.push( value["Order received at"] );
       if ( value["Payment type"] === "Online" ) {
         onlinePaymentSubtotal += value["Subtotal"];
-        onlineDiscount += value["Discount"];
-        onlineVoucher += value["Voucher"];
+        onlineDiscountsPlusVouchers += value["Discounts+Vouchers"];
       }
       if ( value["Payment type"] === "Cash" ) {
         cashPaymentSubtotal += value["Subtotal"];
-        cashDiscount += value["Discount"];
-        cashVoucher += value["Voucher"];
+        cashDiscountsPlusVouchers += value["Discounts+Vouchers"];
       }
     });
     ordersRecivedDateTime = (sortDateTimeStringArray( ordersRecivedDateTime ) );
     return  { "onlinePaymentSubtotal": onlinePaymentSubtotal,
               "cashPaymentSubtotal": cashPaymentSubtotal,
-              "onlineDiscount": onlineDiscount,
-              "onlineVoucher": onlineVoucher,
-              "cashDiscount": cashDiscount,
-              "cashVoucher": cashVoucher,
+              "onlineDiscountsPlusVouchers": onlineDiscountsPlusVouchers,
+              "cashDiscountsPlusVouchers": cashDiscountsPlusVouchers,
               "firstOrderRecived": ordersRecivedDateTime[0],
               "lastOrderRecived": ordersRecivedDateTime.pop()
             };
@@ -130,8 +126,7 @@ function App() {
                 <tr>
                   <th>Payment type</th>
                   <th>Subtotal</th>
-                  <th>Discount</th>
-                  <th>Voucher</th>
+                  <th>Discounts+Vouchers</th>
                   <th>Total</th>
                 </tr>
               </thead>
@@ -139,23 +134,20 @@ function App() {
                 <tr>
                   <td>Online</td>
                   <td>{ csvData.onlinePaymentSubtotal }</td>
-                  <td>{ csvData.onlineDiscount }</td>
-                  <td>{ csvData.onlineVoucher }</td>
-                  <td>{ csvData.onlinePaymentSubtotal-csvData.onlineDiscount-csvData.onlineVoucher }</td>
+                  <td>{ csvData.onlineDiscountsPlusVouchers }</td>
+                  <td>{ csvData.onlinePaymentSubtotal-csvData.onlineDiscountsPlusVouchers }</td>
                 </tr>
                 <tr>
                   <td>Cash</td>
                   <td>{ csvData.cashPaymentSubtotal }</td>
-                  <td>{ csvData.cashDiscount }</td>
-                  <td>{ csvData.cashVoucher }</td>
-                  <td>{ csvData.cashPaymentSubtotal-csvData.cashDiscount-csvData.cashVoucher }</td>
+                  <td>{ csvData.cashDiscountsPlusVouchers }</td>
+                  <td>{ csvData.cashPaymentSubtotal-csvData.cashDiscountsPlusVouchers }</td>
                 </tr>
                 <tr>
                   <td><strong>Total</strong></td>
                   <td>{ csvData.cashPaymentSubtotal + csvData.onlinePaymentSubtotal }</td>
-                  <td>{ csvData.cashDiscount + csvData.onlineDiscount}</td>
-                  <td>{ csvData.cashVoucher + csvData.onlineVoucher }</td>
-                  <td>{ (csvData.cashPaymentSubtotal-csvData.cashDiscount-csvData.cashVoucher) + (csvData.onlinePaymentSubtotal-csvData.onlineDiscount-csvData.onlineVoucher) }</td>
+                  <td>{ csvData.cashDiscountsPlusVouchers + csvData.onlineDiscountsPlusVouchers}</td>
+                  <td>{ (csvData.cashPaymentSubtotal-csvData.cashDiscountsPlusVouchers) + (csvData.onlinePaymentSubtotal-csvData.onlineDiscountsPlusVouchers) }</td>
                 </tr>
               </tbody>
             </table>

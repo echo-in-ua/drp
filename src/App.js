@@ -53,27 +53,41 @@ function App() {
     return dateTimeStringArray;
   }
 
+  const parseNumberWithCommas = (stringNumber) => {
+    // Remove any commas in the string
+    var numberWithoutCommas = stringNumber.replace(",", "");
+  
+    // Parse the number
+    var parsedNumber = parseFloat(numberWithoutCommas);
+  
+    return parsedNumber;
+  }
+  
   const processData = (data) => {
-    let onlinePaymentSubtotal = 0, onlineDiscountsPlusVouchers = 0;
-    let cashPaymentSubtotal = 0, cashDiscountsPlusVouchers = 0;
+    let onlinePaymentSubtotal = 0, onlineDiscounts = 0, onlineVouchers=0; 
+    let cashPaymentSubtotal = 0, cashDiscounts = 0, cashVouchers = 0;
     let ordersRecivedDateTime = [];
 
     data.forEach( (value) => {
       ordersRecivedDateTime.push( value["Order received at"] );
       if ( value["Payment type"] === "Online" ) {
-        onlinePaymentSubtotal += value["Subtotal"];
-        onlineDiscountsPlusVouchers += value["Discounts+Vouchers"];
+        onlinePaymentSubtotal += (typeof value["Subtotal"] === "string") ? parseNumberWithCommas(value["Subtotal"]) : value["Subtotal"];
+        onlineDiscounts += (typeof value["Discount"] === "string") ? parseNumberWithCommas(value["Discount"]) : value["Discount"];
+        onlineVouchers += (typeof value["Voucher"] === "string") ? parseNumberWithCommas(value["Voucher"]) : value["Voucher"];
       }
       if ( value["Payment type"] === "Cash" ) {
-        cashPaymentSubtotal += value["Subtotal"];
-        cashDiscountsPlusVouchers += value["Discounts+Vouchers"];
+        cashPaymentSubtotal += (typeof value["Subtotal"] === "string") ? parseNumberWithCommas(value["Subtotal"]) : value["Subtotal"];
+        cashDiscounts += (typeof value["Discount"] === "string") ? parseNumberWithCommas(value["Discount"]) : value["Discount"];
+        cashVouchers += (typeof value["Voucher"] === "string") ? parseNumberWithCommas(value["Voucher"]) : value["Voucher"];
       }
     });
     ordersRecivedDateTime = (sortDateTimeStringArray( ordersRecivedDateTime ) );
     return  { "onlinePaymentSubtotal": onlinePaymentSubtotal,
               "cashPaymentSubtotal": cashPaymentSubtotal,
-              "onlineDiscountsPlusVouchers": onlineDiscountsPlusVouchers,
-              "cashDiscountsPlusVouchers": cashDiscountsPlusVouchers,
+              "onlineDiscounts": onlineDiscounts,
+              "onlineVouchers": onlineVouchers,
+              "cashDiscounts": cashDiscounts,
+              "cashVouchers": cashVouchers,
               "firstOrderRecived": ordersRecivedDateTime[0],
               "lastOrderRecived": ordersRecivedDateTime.pop()
             };
@@ -126,7 +140,8 @@ function App() {
                 <tr>
                   <th>Payment type</th>
                   <th>Subtotal</th>
-                  <th>Discounts+Vouchers</th>
+                  <th>Discounts</th>
+                  <th>Vouchers</th>
                   <th>Total</th>
                 </tr>
               </thead>
@@ -134,20 +149,23 @@ function App() {
                 <tr>
                   <td>Online</td>
                   <td>{ csvData.onlinePaymentSubtotal }</td>
-                  <td>{ csvData.onlineDiscountsPlusVouchers }</td>
-                  <td>{ csvData.onlinePaymentSubtotal-csvData.onlineDiscountsPlusVouchers }</td>
+                  <td>{ csvData.onlineDiscounts }</td>
+                  <td>{ csvData.onlineVouchers }</td>
+                  <td>{ csvData.onlinePaymentSubtotal-csvData.onlineDiscounts-csvData.onlineVouchers }</td>
                 </tr>
                 <tr>
                   <td>Cash</td>
                   <td>{ csvData.cashPaymentSubtotal }</td>
-                  <td>{ csvData.cashDiscountsPlusVouchers }</td>
-                  <td>{ csvData.cashPaymentSubtotal-csvData.cashDiscountsPlusVouchers }</td>
+                  <td>{ csvData.cashDiscounts }</td>
+                  <td>{ csvData.cashVouchers }</td>
+                  <td>{ csvData.cashPaymentSubtotal-csvData.cashDiscounts-csvData.cashVouchers }</td>
                 </tr>
                 <tr>
                   <td><strong>Total</strong></td>
                   <td>{ csvData.cashPaymentSubtotal + csvData.onlinePaymentSubtotal }</td>
-                  <td>{ csvData.cashDiscountsPlusVouchers + csvData.onlineDiscountsPlusVouchers}</td>
-                  <td>{ (csvData.cashPaymentSubtotal-csvData.cashDiscountsPlusVouchers) + (csvData.onlinePaymentSubtotal-csvData.onlineDiscountsPlusVouchers) }</td>
+                  <td>{ csvData.cashDiscounts + csvData.onlineDiscounts}</td>
+                  <td>{ csvData.cashVouchers + csvData.onlineVouchers}</td>
+                  <td>{ (csvData.onlinePaymentSubtotal-csvData.onlineDiscounts-csvData.onlineVouchers) + (csvData.cashPaymentSubtotal-csvData.cashDiscounts-csvData.cashVouchers) }</td>
                 </tr>
               </tbody>
             </table>

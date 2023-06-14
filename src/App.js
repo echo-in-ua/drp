@@ -70,12 +70,16 @@ function App() {
 
     data.forEach( (value) => {
       ordersRecivedDateTime.push( value["Order received at"] );
-      if ( value["Payment type"] === "Online" && value["Order status"] === "Delivered" ) {
+      if (  value["Payment type"] === "Online" && 
+          ( value["Order status"] === "Delivered" || value["Order status"] === "Courier left pick up"  )
+        ) {
         onlinePaymentSubtotal += (typeof value["Subtotal"] === "string") ? parseNumberWithCommas(value["Subtotal"]) : value["Subtotal"];
         onlineDiscounts += (typeof value["Discount"] === "string") ? parseNumberWithCommas(value["Discount"]) : value["Discount"];
         onlineVouchers += (typeof value["Voucher"] === "string") ? parseNumberWithCommas(value["Voucher"]) : value["Voucher"];
       }
-      if ( value["Payment type"] === "Cash" && value["Order status"] === "Delivered" ) {
+      if ( value["Payment type"] === "Cash" && 
+          ( value["Order status"] === "Delivered" || value["Order status"] === "Courier left pick up"  )
+        ) {
         cashPaymentSubtotal += (typeof value["Subtotal"] === "string") ? parseNumberWithCommas(value["Subtotal"]) : value["Subtotal"];
         cashDiscounts += (typeof value["Discount"] === "string") ? parseNumberWithCommas(value["Discount"]) : value["Discount"];
         cashVouchers += (typeof value["Voucher"] === "string") ? parseNumberWithCommas(value["Voucher"]) : value["Voucher"];
